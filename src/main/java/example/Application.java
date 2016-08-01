@@ -9,10 +9,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
 @SpringBootApplication
 public class Application implements CommandLineRunner {
 
@@ -27,8 +23,6 @@ public class Application implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        initDatabase();
-        preparingData();
         doQuery();
     }
 
@@ -47,28 +41,4 @@ public class Application implements CommandLineRunner {
                 LOGGER.info(customer.toString()));
     }
 
-    private void preparingData() {
-        List<Object[]> splitUpNames = Arrays.asList(
-                "John Woo",
-                "Jeff Dean",
-                "Josh Bloch",
-                "Josh Long")
-                .stream()
-                .map(name -> name.split(" "))
-                .collect(Collectors.toList());
-
-        splitUpNames.forEach(name ->
-                LOGGER.info(String.format(
-                        "Inserting customer record for %s %s", name[0], name[1])));
-
-        String insertSql = "INSERT INTO customers(first_name, last_name) VALUES (?,?)";
-        jdbcTemplate.batchUpdate(insertSql, splitUpNames);
-    }
-
-    private void initDatabase() {
-        LOGGER.info("Creating tables");
-
-        jdbcTemplate.execute("DROP TABLE IF EXISTS customers");
-        jdbcTemplate.execute("CREATE TABLE customers(id SERIAL, first_name VARCHAR(255), last_name VARCHAR(255))");
-    }
 }
